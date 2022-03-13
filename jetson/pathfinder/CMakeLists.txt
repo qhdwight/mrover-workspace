@@ -6,15 +6,8 @@ set(OpenGL_GL_PREFERENCE GLVND)
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(rapidjson REQUIRED)
 include_directories(${GLFW_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
-
-set(RAPIDJSON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty/rapidjson)
-set(RAPIDJSON_BUILD_DOC OFF)
-set(RAPIDJSON_BUILD_EXAMPLES OFF)
-set(RAPIDJSON_BUILD_TESTS OFF)
-set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF)
-add_subdirectory(${RAPIDJSON_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rapidjson)
-include_directories(${RAPIDJSON_DIR}/include)
 
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 include_directories(

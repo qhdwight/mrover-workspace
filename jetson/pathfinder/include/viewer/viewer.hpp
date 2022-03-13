@@ -11,14 +11,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define GLM_ENABLE_EXPERIMENTAL
-
-#include <glm/gtx/rotate_vector.hpp>
-
 #include <pointcloud.hpp>
 
-typedef glm::vec3 vec3;
-typedef glm::vec4 vec4;
+using glm::vec3;
+using glm::vec4;
 
 class PointCloudGraphics {
 public:

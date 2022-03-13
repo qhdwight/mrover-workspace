@@ -38,10 +38,10 @@ GLchar const* PC_VERTEX_SHADER =
         "out vec4 b_color;\n"
         "void main() {\n"
         "   uint q = floatBitsToUint(in_Vertex.w);\n"
-        "   float r = float(q & uint(0x000000FF))/255.0f;\n"
-        "   float g = float( (q & uint(0x0000FF00)) >> 8 )/255.0f;\n"
-        "   float b = float( (q & uint(0x00FF0000)) >> 16)/255.0f;\n"
-        "   b_color = vec4(r, g, b, 1.f);\n"
+        "   float r = float( q & uint(0x000000FF))       /255.0f;\n"
+        "   float g = float((q & uint(0x0000FF00)) >> 8 )/255.0f;\n"
+        "   float b = float((q & uint(0x00FF0000)) >> 16)/255.0f;\n"
+        "   b_color = vec4(r, g, b, 1.0f);\n"
         "	gl_Position = u_mvpMatrix * vec4(in_Vertex.xyz, 1);\n"
         "}";
 
@@ -243,13 +243,13 @@ PointCloudGraphics::~PointCloudGraphics() {
 }
 
 void PointCloudGraphics::update(PointCloud& pts) {
-    size = pts.positions.size();
+    size = pts.points.size();
 //    this->pointsCPU.assign(pts.begin(), pts.end()); // enable when you need
     // Update GPU data for rendering
     glBindVertexArray(vaoId);
     // Points
     glBindBuffer(GL_ARRAY_BUFFER, pointsGPU);
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(vec4), pts.positions.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, size * sizeof(vec4), pts.points.data(), GL_DYNAMIC_DRAW);
 }
 
 void PointCloudGraphics::draw() const {
@@ -531,7 +531,7 @@ void Viewer::updatePointCloud(PointCloud& pc) {
     // Calculate bounds
     float maxX = numeric_limits<float>::min(), maxZ = numeric_limits<float>::min();
     float minX = numeric_limits<float>::max(), minZ = numeric_limits<float>::max();
-    for (vec3& pt: pc.positions) {
+    for (vec4& pt: pc.points) {
         maxX = max(maxX, pt.x);
         maxZ = max(maxZ, pt.z);
         minX = min(minX, pt.x);

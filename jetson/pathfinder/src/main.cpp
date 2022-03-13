@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
         viewer.initGraphics();
         while (viewer.open()) {
             viewer.updatePointCloud(pointClouds[0]);
-//            viewer.draw();
+            viewer.draw();
         }
 
         return EXIT_SUCCESS;
