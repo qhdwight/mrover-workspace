@@ -1,5 +1,6 @@
 package rover_msgs;
 
+//+x is to the right of camera, +y is down from camera, +z is forward (out) from the camera
 struct Obstacle {
 	double bottom_left_coordinate_meters[3];
 	double top_right_corrdinate_meters[3];
