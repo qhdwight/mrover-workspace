@@ -1,7 +1,7 @@
 #include "obstacleAvoidance.hpp"
 
 //returns a bearing decision struct representing the desired NavState and bearing of the obstacle avoidance controller
-BearingDecision ObstacleAvoidance::getDesiredBearingDecision(std::vector<Obstacle>& obstacles, Odometry roverOdom, Waypoint dest){
+BearingDecision ObstacleAvoidance::getDesiredBearingDecision(std::vector<Obstacle>& obstacles, Odometry roverOdom, Odometry dest){
     //TODO implement
     return {NavState::Drive, -1.0};
 }
@@ -15,7 +15,7 @@ std::vector<double> ObstacleAvoidance::getClearBearings(std::vector<Obstacle>& o
 
 //returns a bearing that the rover should target to try to get to the destination while also getting around obstacles
 //not latency adjusted
-double ObstacleAvoidance::getIdealDesiredBearing(Odometry roverOdom, Waypoint dest, std::vector<double> clearBearings){
+double ObstacleAvoidance::getIdealDesiredBearing(Odometry roverOdom, Odometry dest, std::vector<double> clearBearings){
     //TODO: implement
     return -1.0;
 }
