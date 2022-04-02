@@ -2,6 +2,6 @@ package rover_msgs;
 
 //+x is to the right of camera, +y is down from camera, +z is forward (out) from the camera
 struct ObstacleList {
-    int numObstacles;
+    int32_t numObstacles;
 	Obstacle obstacles[numObstacles];
 }

@@ -1,6 +1,7 @@
 #include "perception.hpp"
 #include "rover_msgs/Target.hpp"
 #include "rover_msgs/TargetList.hpp"
+#include "rover_msgs/ObstacleList.hpp"
 #include <unistd.h>
 #include <deque>
 
@@ -49,10 +50,7 @@ int main() {
     arTags[0].distance = mRoverConfig["ar_tag"]["default_tag_val"].GetInt();
     arTags[1].distance = mRoverConfig["ar_tag"]["default_tag_val"].GetInt();
     
-    rover_msgs::Obstacle obstacleMessage;
-    obstacleMessage.bearing = 0;
-    obstacleMessage.rightBearing = 0;
-    obstacleMessage.distance = -1;
+    rover_msgs::ObstacleList obstacleMessage{};
     
     /* --- AR Tag Initializations --- */
     TagDetector detector(mRoverConfig);
@@ -162,9 +160,7 @@ int main() {
             lastObstacle = obstacleOutput;
 
         //Update LCM 
-        obstacleMessage.bearing = lastObstacle.leftBearing; // Update LCM bearing field
-        obstacleMessage.rightBearing = lastObstacle.rightBearing;
-        obstacleMessage.distance = lastObstacle.distance; // Update LCM distance field
+        // TODO: place in obstacles
         #if PERCEPTION_DEBUG
             cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Path Sent: " << obstacleMessage.bearing << "\n";
             cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Distance Sent: " << obstacleMessage.distance << "\n";
