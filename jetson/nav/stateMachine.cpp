@@ -48,7 +48,7 @@ void StateMachine::updateObstacleElements(double leftBearing, double rightBearin
 // run if the state has changed or if the rover's status has changed.
 // Will call the corresponding function based on the current state.
 void StateMachine::run() {
-    mRover->updateTargets(mEnv, mCourseProgress);
+    mEnv->updateTargets(mRover, mCourseProgress);
 
     publishNavState();
     NavState nextState = NavState::Unknown;
@@ -111,8 +111,7 @@ void StateMachine::run() {
             break;
         }
 
-        case NavState::BeginGateSearch:
-        case NavState::GateMakePath: {
+        case NavState::GateTraverse: {
             nextState = mGateStateMachine->run();
             break;
         }
@@ -238,8 +237,7 @@ std::string StateMachine::stringifyNavState() const {
                     {NavState::DriveAroundObs,       "Drive Around Obstacle"},
                     {NavState::SearchTurnAroundObs,  "Search Turn Around Obstacle"},
                     {NavState::SearchDriveAroundObs, "Search Drive Around Obstacle"},
-                    {NavState::BeginGateSearch,      "Gate Prepare"},
-                    {NavState::GateMakePath,         "Gate Make Path"},
+                    {NavState::GateTraverse,      "Gate Traverse"},
 
                     {NavState::Unknown,              "Unknown"}
             };
