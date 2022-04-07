@@ -26,6 +26,7 @@ StateMachine::StateMachine(
 
 void StateMachine::setSearcher(SearchType type) {
     mSearchStateMachine = SearchFactory(weak_from_this(), type, mRover, mConfig);
+    mSearchStateMachine->initializeSearch(mConfig, mConfig["computerVision"]["visionDistance"].GetDouble());
 }
 
 void StateMachine::setGateSearcher() {
@@ -63,7 +64,7 @@ void StateMachine::run() {
         }
         return;
     }
-    if (mEnv->hasGateLocation()){
+    if (mEnv->hasGateLocation()) {
         mGateStateMachine->updateGateTraversalPath();
         nextState = NavState::GateTraverse;
     }
@@ -108,10 +109,8 @@ void StateMachine::run() {
         }
 
         case NavState::BeginSearch: {
-            double visionDistance = mConfig["computerVision"]["visionDistance"].GetDouble();
             setSearcher(SearchType::FROM_PATH_FILE);
 
-            mSearchStateMachine->initializeSearch(mConfig, visionDistance);
             nextState = NavState::SearchTurn;
             break;
         }
@@ -122,17 +121,16 @@ void StateMachine::run() {
             break;
         }
         case NavState::GateMakePath:
-        case NavState::GateDrivePath: {
-            case NavState::GateTraverse: {
-                nextState = mGateStateMachine->run();
-                break;
-            }
+        case NavState::GateDrivePath:
+        case NavState::GateTraverse: {
+            nextState = mGateStateMachine->run();
+            break;
+        }
 
-            case NavState::Unknown: {
-                throw std::runtime_error("Entered unknown state.");
-            }
-        } // switch
-    }
+        case NavState::Unknown: {
+            throw std::runtime_error("Entered unknown state.");
+        }
+    } // switch
 
     if (nextState != mRover->currentState()) {
         mRover->setState(nextState);

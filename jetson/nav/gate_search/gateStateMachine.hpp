@@ -9,11 +9,7 @@
 #include "../filter.hpp"
 #include "rover_msgs/Odometry.hpp"
 
-
 using namespace rover_msgs;
-
-const size_t LEFT_TARGET_IDX = 0;
-const size_t RIGHT_TARGET_IDX = 1;
 
 class StateMachine;
 
@@ -51,8 +47,6 @@ private:
     /* Private Member Variables */
     /*************************************************************************/
     const rapidjson::Document& mRoverConfig;
-
-    Filter<double> mLeftDistFilter, mRightDistFilter, mLeftBearingFilter, mRightBearingFilter;
 
     std::deque<Odometry> mPath;
 };

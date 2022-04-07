@@ -2,11 +2,14 @@
 
 #include <vector>
 
-#include "rover_msgs/Obstacle.hpp"
-#include "rover_msgs/TargetList.hpp"
+#include <eigen3/Eigen/Core>
+
 #include "rover.hpp"
 #include "filter.hpp"
+#include "rover_msgs/Obstacle.hpp"
+#include "rover_msgs/TargetList.hpp"
 
+using Eigen::Vector2d;
 using namespace rover_msgs;
 
 class Rover;
@@ -57,6 +60,10 @@ public:
 
     Odometry getRightPostLocation();
 
+    Vector2d getLeftPostRelative();
+
+    Vector2d getRightPostRelative();
+
     void setTargets(TargetList const& targets);
 
     [[nodiscard]] Target const& leftCacheTarget() const;
@@ -76,4 +83,6 @@ public:
     void updateTargets(std::shared_ptr<Rover> const& rover, std::shared_ptr<CourseProgress> const& course);
 
     [[nodiscard]] bool hasGateLocation() const;
+
+    bool areTargetFiltersReady() const;
 };

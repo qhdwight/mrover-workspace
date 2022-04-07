@@ -12,22 +12,17 @@ using Eigen::Vector2d;
 // Constructs a GateStateMachine object with mStateMachine
 GateStateMachine::GateStateMachine(std::weak_ptr<StateMachine> stateMachine, const rapidjson::Document& roverConfig) :
         mStateMachine(move(stateMachine)),
-        mRoverConfig(roverConfig),
-        mLeftDistFilter(roverConfig["gate"]["filterSize"].GetInt()),
-        mRightDistFilter(roverConfig["gate"]["filterSize"].GetInt()),
-        mLeftBearingFilter(roverConfig["gate"]["filterSize"].GetInt()),
-        mRightBearingFilter(roverConfig["gate"]["filterSize"].GetInt()) {
+        mRoverConfig(roverConfig) {
 }
 
 GateStateMachine::~GateStateMachine() = default;
 
 void GateStateMachine::updateGateTraversalPath() {
     //TODO: update the gatePath vector here with a path to go to
-    std::shared_ptr<Environment> env = mStateMachine.lock()->getEnv();
-    Odometry leftPost = env->getLeftPostLocation();
-    Odometry rightPost = env->getRightPostLocation();
+//    std::shared_ptr<Environment> env = mStateMachine.lock()->getEnv();
+//    Odometry leftPost = env->getLeftPostLocation();
+//    Odometry rightPost = env->getRightPostLocation();
 }
-
 
 // Execute loop through gate state machine.
 NavState GateStateMachine::run() {
@@ -35,23 +30,14 @@ NavState GateStateMachine::run() {
     auto rover = sm->getRover();
     switch (rover->currentState()) {
         case NavState::BeginGateSearch: {
-            mLeftDistFilter.reset();
-            mRightDistFilter.reset();
-            mLeftBearingFilter.reset();
-            mRightBearingFilter.reset();
             mPath.clear();
             return NavState::GateMakePath;
         }
         case NavState::GateMakePath: {
             std::shared_ptr<Environment> env = sm->getEnv();
-//            double leftDist = mLeftDistFilter.get(0.75);
-//            double rightDist = mRightDistFilter.get(0.75);
-//            double leftBearing = degreeToRadian(mLeftBearingFilter.get(0.75));
-//            double rightBearing = degreeToRadian(mRightBearingFilter.get(0.75));
-            if (mLeftDistFilter.full() && mRightDistFilter.full() && mLeftBearingFilter.full() && mRightBearingFilter.full()) {
-//                Vector2d p1{leftDist * cos(leftBearing), leftDist * sin(leftBearing)};
-//                Vector2d p2{rightDist * cos(rightBearing), rightDist * sin(rightBearing)};
-                Vector2d p1{}, p2{};
+            if (env->areTargetFiltersReady()) {
+                Vector2d p1 = env->getLeftPostRelative();
+                Vector2d p2 = env->getRightPostRelative();
                 Vector2d v = p2 - p1;
                 Vector2d m = p1 + v / 2;
                 double driveDist = v.dot(m) / v.norm() + mRoverConfig["navThresholds"]["waypointDistance"].GetDouble();

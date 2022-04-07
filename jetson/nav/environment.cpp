@@ -3,10 +3,12 @@
 #include "utilities.hpp"
 #include "environment.hpp"
 
-Environment::Environment(const rapidjson::Document& config) : mRoverConfig(config), mLeftBearingFilter(config["gate"]["filterSize"].GetInt()),
-                                                              mRightBearingFilter(config["gate"]["filterSize"].GetInt()),
-                                                              mLeftDistanceFilter(config["gate"]["filterSize"].GetInt()),
-                                                              mRightDistanceFilter(config["gate"]["filterSize"].GetInt()) {}
+Environment::Environment(const rapidjson::Document& config) :
+        mRoverConfig(config),
+        mLeftBearingFilter(config["gate"]["filterSize"].GetInt(), config["gate"]["filterProportion"].GetDouble()),
+        mRightBearingFilter(config["gate"]["filterSize"].GetInt(), config["gate"]["filterProportion"].GetDouble()),
+        mLeftDistanceFilter(config["gate"]["filterSize"].GetInt(), config["gate"]["filterProportion"].GetDouble()),
+        mRightDistanceFilter(config["gate"]["filterSize"].GetInt(), config["gate"]["filterProportion"].GetDouble()) {}
 
 void Environment::setObstacle(Obstacle const& obstacle) {
     mObstacle = obstacle;
@@ -33,8 +35,8 @@ void Environment::setTargets(TargetList const& targets) {
     } else {
         mLeftBearingFilter.push(mTargetLeft.bearing);
         mLeftDistanceFilter.push(mTargetLeft.distance);
-        mTargetLeft.bearing = mLeftBearingFilter.get(mRoverConfig["gate"]["filterProportion"].GetDouble());
-        mTargetLeft.distance = mLeftDistanceFilter.get((mRoverConfig["gate"]["filterProportion"].GetDouble()));
+        mTargetLeft.bearing = mLeftBearingFilter.get();
+        mTargetLeft.distance = mLeftDistanceFilter.get();
     }
 
     if (targets.targetList[1].id == -1) {
@@ -43,8 +45,8 @@ void Environment::setTargets(TargetList const& targets) {
     } else {
         mRightBearingFilter.push(mTargetRight.bearing);
         mRightDistanceFilter.push(mTargetRight.distance);
-        mTargetRight.bearing = mRightBearingFilter.get((mRoverConfig["gate"]["filterProportion"].GetDouble()));
-        mTargetRight.distance = mRightDistanceFilter.get((mRoverConfig["gate"]["filterProportion"].GetDouble()));
+        mTargetRight.bearing = mRightBearingFilter.get();
+        mTargetRight.distance = mRightDistanceFilter.get();
     }
 }
 
@@ -149,4 +151,18 @@ Odometry Environment::getLeftPostLocation() {
 
 Odometry Environment::getRightPostLocation() {
     return mRightPost;
+}
+
+Vector2d Environment::getLeftPostRelative() {
+    double d = mLeftDistanceFilter.get(), b = mLeftBearingFilter.get();
+    return {d * cos(degreeToRadian(b)), d * sin(degreeToRadian(b))};
+}
+
+Vector2d Environment::getRightPostRelative() {
+    double d = mRightDistanceFilter.get(), b = mRightBearingFilter.get();
+    return {d * cos(degreeToRadian(b)), d * sin(degreeToRadian(b))};
+}
+
+bool Environment::areTargetFiltersReady() const {
+    return mLeftDistanceFilter.full() && mRightDistanceFilter.full() && mLeftBearingFilter.full() && mRightBearingFilter.full();
 }
