@@ -24,11 +24,11 @@ public:
     /*************************************************************************/
     GateStateMachine(std::weak_ptr<StateMachine> stateMachine, const rapidjson::Document& roverConfig);
 
-    virtual ~GateStateMachine();
+    ~GateStateMachine();
 
     NavState run();
 
-    virtual void initializeSearch() = 0;
+    void updateGateTraversalPath();
 
     /*************************************************************************/
     /* Public Member Variables */

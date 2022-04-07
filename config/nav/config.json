@@ -76,7 +76,9 @@
 		"spiralSearchPoints": "jetson/nav/search/spiral_search_points.txt"
 	},
 
-	"gate": {
-		"filterSize": 12
+	"gate":
+	{
+		"filterSize": 12,
+		"filterProportion": 0.75
 	}
 }

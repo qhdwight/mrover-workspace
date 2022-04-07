@@ -6,7 +6,6 @@
 
 #include "utilities.hpp"
 #include "rover_msgs/NavStatus.hpp"
-#include "gate_search/circleGateSearch.hpp"
 #include "obstacle_avoidance/simpleAvoidance.hpp"
 
 // Constructs a StateMachine object with the input lcm object.
@@ -50,7 +49,7 @@ void StateMachine::updateObstacleElements(double leftBearing, double rightBearin
 // run if the state has changed or if the rover's status has changed.
 // Will call the corresponding function based on the current state.
 void StateMachine::run() {
-    mRover->updateTargets(mEnv, mCourseProgress);
+    mEnv->updateTargets(mRover, mCourseProgress);
 
     publishNavState();
     NavState nextState = NavState::Unknown;
@@ -63,6 +62,10 @@ void StateMachine::run() {
             mRover->setState(nextState);
         }
         return;
+    }
+    if (mEnv->hasGateLocation()){
+        mGateStateMachine->updateGateTraversalPath();
+        nextState = NavState::GateTraverse;
     }
     switch (mRover->currentState()) {
         case NavState::Off: {
@@ -120,14 +123,16 @@ void StateMachine::run() {
         }
         case NavState::GateMakePath:
         case NavState::GateDrivePath: {
-            nextState = mGateStateMachine->run();
-            break;
-        }
+            case NavState::GateTraverse: {
+                nextState = mGateStateMachine->run();
+                break;
+            }
 
-        case NavState::Unknown: {
-            throw std::runtime_error("Entered unknown state.");
-        }
-    } // switch
+            case NavState::Unknown: {
+                throw std::runtime_error("Entered unknown state.");
+            }
+        } // switch
+    }
 
     if (nextState != mRover->currentState()) {
         mRover->setState(nextState);
@@ -248,6 +253,7 @@ std::string StateMachine::stringifyNavState() const {
                     {NavState::BeginGateSearch,      "Gate Prepare"},
                     {NavState::GateMakePath,         "Gate Make Path"},
                     {NavState::GateDrivePath,        "Gate Drive Path"},
+                    {NavState::GateTraverse,         "Gate Traverse"},
 
                     {NavState::Unknown,              "Unknown"}
             };

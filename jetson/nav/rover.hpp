@@ -49,6 +49,7 @@ enum class NavState {
     BeginGateSearch = 40,
     GateMakePath = 41,
     GateDrivePath = 42,
+    GateTraverse = 43,
 
     // Unknown State
     Unknown = 255
@@ -88,31 +89,13 @@ public:
 
     Odometry const& odometry() const;
 
-    Target const& leftTarget() const;
-
-    Target const& rightTarget() const;
-
-    Target const& leftCacheTarget() const;
-
-    Target const& rightCacheTarget() const;
-
-    int getLeftMisses() const;
-
-    int getRightMisses() const;
-
-    int getLeftHits() const;
-
-    int getRightHits() const;
-
     void setAutonState(AutonState state);
 
     void setOdometry(Odometry const& odometry);
 
-    void updateTargets(std::shared_ptr<Environment> const& env, std::shared_ptr<CourseProgress> const& course);
-
     void setState(NavState state);
 
-    void resetMisses();
+    void setLongMeterInMinutes(double LongMeterInMinutes);
 
 private:
     /*************************************************************************/
@@ -153,21 +136,5 @@ private:
     // The rover's current odometry information.
     Odometry mOdometry{};
 
-    // The rover's current target information from computer
-    // vision.
-    Target mTargetLeft{-1.0, 0.0, 0};
-    Target mTargetRight{-1.0, 0.0, 0};
 
-    // Cached Target
-    // Left means left in the pixel space
-    Target mCacheTargetLeft{-1.0, 0.0, 0};
-    Target mCacheTargetRight{-1.0, 0.0, 0};
-
-    // Count of misses with cache
-    int mCountLeftMisses = 0;
-    int mCountRightMisses = 0;
-
-    // Count hits for avoiding FPs
-    int mCountLeftHits = 0;
-    int mCountRightHits = 0;
 };
