@@ -53,9 +53,10 @@ void Environment::setTargets(TargetList const& targets) {
 void Environment::updateTargets(std::shared_ptr<Rover> const& rover, std::shared_ptr<CourseProgress> const& course) {
     if (rover->autonState().is_auton) {
         // Cache Left Target if we had detected one
+        std::deque<Waypoint> const& waypoints = course->getRemainingWaypoints();
         if (mTargetLeft.distance != mConfig["navThresholds"]["noTargetDist"].GetDouble()) {
             // Associate with single post
-            if (mTargetLeft.id == course->getRemainingWaypoints().front().id) {
+            if (mTargetLeft.id == waypoints.front().id) {
                 mCountLeftHits++;
             } else {
                 mCountLeftHits = 0;
@@ -95,7 +96,7 @@ void Environment::updateTargets(std::shared_ptr<Rover> const& rover, std::shared
             mCacheTargetRight = {-1, 0, 0};
         }
 
-        bool gate = course->getRemainingWaypoints().front().gate;
+        bool gate = !waypoints.empty() && waypoints.front().gate;
         if (gate) {
             if (leftCacheTarget().id != -1) {
                 mLeftPost = createOdom(rover->odometry(), leftCacheTarget().bearing, leftCacheTarget().distance, rover);
