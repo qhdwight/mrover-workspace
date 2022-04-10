@@ -2,6 +2,8 @@
 
 #include "utilities.hpp"
 #include "environment.hpp"
+#include <iostream>
+#include <string>
 
 Environment::Environment(const rapidjson::Document& config) :
         mConfig(config),
@@ -26,6 +28,14 @@ Target Environment::getRightTarget() {
     return mTargetRight;
 }
 
+void Environment::setBaseGateID(int b){
+    baseGateID = b;
+}
+
+int Environment::getBaseGateID(){
+    return baseGateID;
+}
+
 void Environment::setTargets(TargetList const& targets) {
     mTargetLeft = targets.targetList[0];
     mTargetRight = targets.targetList[1];
@@ -43,6 +53,7 @@ void Environment::setTargets(TargetList const& targets) {
         mRightBearingFilter.reset();
         mRightDistanceFilter.reset();
     } else {
+        std::cout << "adding right readings" << std::endl;
         mRightBearingFilter.push(mTargetRight.bearing);
         mRightDistanceFilter.push(mTargetRight.distance);
         mTargetRight.bearing = mRightBearingFilter.get();
@@ -52,14 +63,34 @@ void Environment::setTargets(TargetList const& targets) {
 
 void Environment::updateTargets(std::shared_ptr<Rover> const& rover, std::shared_ptr<CourseProgress> const& course) {
     if (rover->autonState().is_auton) {
-        bool isReady = areTargetFiltersReady();
-        if (isReady) {
-            mLeftPost = createOdom(rover->odometry(), mLeftBearingFilter.get(), mLeftDistanceFilter.get(), rover);
-            mHasLeftPost = true;
-            mRightPost = createOdom(rover->odometry(), mRightBearingFilter.get(), mRightDistanceFilter.get(), rover);
-            mHasRightPost = true;
-        } else {
-            mHasLeftPost = mHasRightPost = false;
+        bool rightReady = isRightTargetFilterReady();
+        bool leftReady = isLeftTargetFilterReady();
+        if (rightReady){
+            std::cout << "right ready: " << mTargetRight.id << std::endl;
+            if (mTargetRight.id == baseGateID){
+                std::cout << "updated post 1" << std::endl;
+                mPostOne = createOdom(rover->odometry(), mRightBearingFilter.get(), mRightDistanceFilter.get(), rover);
+                hasPostOne = true;
+            }
+            if (mTargetRight.id == baseGateID + 1){
+                std::cout << "updated post 2" << std::endl;
+                mPostTwo = createOdom(rover->odometry(), mRightBearingFilter.get(), mRightDistanceFilter.get(), rover);
+                hasPostTwo = true;
+            }
+        }
+        if (leftReady){
+            std::cout << "left ready: " << mTargetLeft.id << std::endl;
+            std::cout << "course waypoint id: " << course->getCurrentWaypoint().id << std::endl;
+            if (mTargetLeft.id == baseGateID){
+                std::cout << "updated post 1" << std::endl;
+                mPostOne = createOdom(rover->odometry(), mLeftBearingFilter.get(), mLeftDistanceFilter.get(), rover);
+                hasPostOne = true;
+            }
+            if (mTargetLeft.id == baseGateID + 1){
+                std::cout << "updated post 2" << std::endl;
+                mPostTwo = createOdom(rover->odometry(), mLeftBearingFilter.get(), mLeftDistanceFilter.get(), rover);
+                hasPostTwo = true;
+            }
         }
     } else {
         double cosine = cos(degreeToRadian(rover->odometry().latitude_deg, rover->odometry().latitude_min));
@@ -68,29 +99,48 @@ void Environment::updateTargets(std::shared_ptr<Rover> const& rover, std::shared
 }
 
 bool Environment::hasGateLocation() const {
-    return mHasLeftPost && mHasRightPost;
+    return hasPostOne && hasPostTwo;
 }
 
-Odometry Environment::getLeftPostLocation() {
-    return mLeftPost;
+bool Environment::hasPostOneLocation() const {
+    return hasPostOne;
 }
 
-Odometry Environment::getRightPostLocation() {
-    return mRightPost;
+bool Environment::hasPostTwoLocation() const {
+    return hasPostTwo;
 }
 
-Vector2d Environment::getLeftPostRelative() {
-    double d = mLeftDistanceFilter.get(), b = mLeftBearingFilter.get();
-    return {d * cos(degreeToRadian(b)), d * sin(degreeToRadian(b))};
+Odometry Environment::getPostOneLocation() {
+    return mPostOne;
 }
 
-Vector2d Environment::getRightPostRelative() {
-    double d = mRightDistanceFilter.get(), b = mRightBearingFilter.get();
-    return {d * cos(degreeToRadian(b)), d * sin(degreeToRadian(b))};
+Odometry Environment::getPostTwoLocation() {
+    return mPostTwo;
+}
+
+Vector2d Environment::getPostOneRelative(Odometry cur) {
+    double bearing = degreeToRadian(calcBearing(cur, mPostOne));
+    double distance = estimateNoneuclid(cur, mPostOne);
+    return {distance * cos(bearing), distance * sin(bearing)};
+
+}
+
+Vector2d Environment::getPostTwoRelative(Odometry cur) {
+    double bearing = degreeToRadian(calcBearing(cur, mPostTwo));
+    double distance = estimateNoneuclid(cur, mPostTwo);
+    return {distance * cos(bearing), distance * sin(bearing)};
 }
 
 bool Environment::areTargetFiltersReady() const {
-    return mLeftDistanceFilter.full() && mRightDistanceFilter.full() && mLeftBearingFilter.full() && mRightBearingFilter.full();
+    return mLeftDistanceFilter.ready() && mRightDistanceFilter.ready() && mLeftBearingFilter.ready() && mRightBearingFilter.ready();
+}
+
+bool Environment::isLeftTargetFilterReady() const {
+    return mLeftDistanceFilter.ready() && mLeftBearingFilter.ready();
+}
+
+bool Environment::isRightTargetFilterReady() const {
+    return mRightDistanceFilter.ready() && mRightBearingFilter.ready();
 }
 
 std::optional<Target> Environment::tryGetTargetWithId(int32_t id) {
