@@ -215,6 +215,10 @@ std::shared_ptr<Rover> StateMachine::getRover() {
     return mRover;
 }
 
+lcm::LCM& StateMachine::getLCM() {
+    return mLcmObject;
+}
+
 double StateMachine::getDtSeconds() {
     return std::chrono::duration<double>(mTimePoint - mPrevTimePoint).count();
 }
