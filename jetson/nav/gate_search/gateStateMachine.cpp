@@ -171,7 +171,7 @@ void GateStateMachine::publishGatePath() {
         .points = arr
     };
 
-    std::string gatePathChannel = mRoverConfig["lcmChannels"]["gatePathChannel"].GetString();
+    std::string gatePathChannel = mConfig["lcmChannels"]["gatePathChannel"].GetString();
     mStateMachine.lock()->getLCM().publish(gatePathChannel, &gatePathPoints);
 
 } // publishSearchPoints()
