@@ -1,0 +1,15 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ github-action-ci ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: umrover1/travis:20.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: ./jarvis build -a .
