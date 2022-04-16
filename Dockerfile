@@ -106,11 +106,11 @@ RUN echo "==================== Building & Installing PCL ====================" &
     ninja -j $(($(nproc) - 1)) && ninja install && ldconfig && \
     rm -rf /usr/local/pcl-1.11.1
 
-RUN mkdir /opt/jetson-util && cd /opt/jetson-util && \
-    git clone https://github.com/dusty-nv/jetson-utils.git && \
+RUN cd /opt && \
+    git clone https://github.com/dusty-nv/jetson-utils.git && cd jetson-utils && \
     cmake -GNinja -Bbuild . && cd build && \
     ninja && ninja install && \
-    rm -r /opt/jetson-util
+    rm -r /opt/jetson-utils
 
 # Set up ease of use shell tools
 ENV TERM xterm
